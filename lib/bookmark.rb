@@ -3,6 +3,14 @@ require 'uri'
 
 class Bookmark
 
+  attr_reader :title, :url, :id
+
+  def initialize(id, url, title)
+    @url = url
+    @title = title
+    @id = id
+  end
+
   def self.all
     if ENV['ENVIRONMENT'] == 'test'
       connection = PG.connect(dbname: 'bookmark_manager_test')
@@ -11,7 +19,7 @@ class Bookmark
     end
 
     result = connection.exec("SELECT * FROM bookmarks")
-    result.map { |bookmark| bookmark['url'] }
+    result.map { |bookmark| Bookmark.new(bookmark['id'], bookmark['url'], bookmark['title']) }
   end
 
   def self.create(options)
@@ -20,12 +28,19 @@ class Bookmark
     else
       connection = PG.connect(dbname: 'bookmark_manager')
     end
-    error_message = "Error this is not a valid URL"
-      if options[:url] =~ /\A#{URI::regexp(['http', 'https'])}\z/
-        connection.exec("INSERT INTO bookmarks (url) VALUES('#{options[:url]}')")
-      else
-        error_message
-      end
+    return false unless is_url?(options[:url])
+    result = connection.exec("INSERT INTO bookmarks (url, title) VALUES('#{options[:url]}', '#{options[:title]}') RETURNING id, url, title")
+    Bookmark.new(result.first['id'], result.first['url'], result.first['title'])
+  end
+
+  def ==(other)
+    @id = other.id
+  end
+
+  private
+
+  def self.is_url?(url)
+    url =~ /\A#{URI::regexp(['http', 'https'])}\z/
   end
 
 end

@@ -2,7 +2,7 @@
 require 'sinatra/base'
 require 'sinatra/flash'
 require './lib/bookmark'
-# require 'uri'
+require 'uri'
 
 class BookmarkManager < Sinatra::Base
 
@@ -19,11 +19,7 @@ class BookmarkManager < Sinatra::Base
   end
 
   post '/bookmarks' do
-    if params['url'] =~ /\A#{URI::regexp(['http', 'https'])}\z/
-      Bookmark.create(url: params['url'])
-    else
-      flash[:error_message] = "Error this is not a valid URL"
-    end
+    flash[:error_message] = "Error this is not a valid URL" unless Bookmark.create(url: params['url'], title: params['title'])
     redirect '/bookmarks'
   end
 

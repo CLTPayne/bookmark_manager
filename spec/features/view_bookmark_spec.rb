@@ -3,13 +3,13 @@ require 'pg'
 feature "viewing bookmarks" do
   scenario "user can see bookmarks" do
 
-    Bookmark.create(url: "https://www.ft.com")
-    Bookmark.create(url: "https://www.economist.com")
-    Bookmark.create(url: "https://www.dailymail.co.uk")
+    Bookmark.create(url: "https://www.ft.com", title: "The Financial Times")
+    Bookmark.create(url: "https://www.economist.com", title: "The Economist")
+    Bookmark.create(url: "https://www.dailymail.co.uk", title: "The Daily Mail")
     visit('/bookmarks')
 
-    expect(page).to have_content "https://www.ft.com"
-    expect(page).to have_content "https://www.economist.com"
-    expect(page).to have_content "https://www.dailymail.co.uk"
+    expect(page).to have_content "The Financial Times"
+    expect(page).to have_content "The Economist"
+    expect(page).to have_content "The Daily Mail"
   end
 end
